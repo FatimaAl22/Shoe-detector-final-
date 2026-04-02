@@ -13,10 +13,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV PORT=10000
+# Remove hardcoded PORT if you want Render to assign it dynamically
+# ENV PORT=10000
 
+# Use shell form so $PORT is expanded correctly
 CMD gunicorn --bind 0.0.0.0:$PORT app:app
-
 
 
 
