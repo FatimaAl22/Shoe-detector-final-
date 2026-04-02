@@ -16,18 +16,10 @@ def run_prediction():
     if not image_url:
         return "No URL provided"
 
-    os.makedirs("uploads", exist_ok=True)
-    os.makedirs("static", exist_ok=True)
+    filepath = "input.jpg"
+    urllib.request.urlretrieve(image_url, filepath)
 
-    input_path = os.path.join("uploads", "input.jpg")
-    try:
-        urllib.request.urlretrieve(image_url, input_path)
-    except:
-        return "Failed to load image"
-
-    output_path = predict(input_path)
-
-    filename = os.path.basename(output_path)
+    output_path = predict(filepath)
 
     return f"""
     <h2>Detection Result</h2>
