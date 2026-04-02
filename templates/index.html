@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Shoe Detector</title>
+    <title>YOLO Object Detection</title>
 </head>
 <body>
-    <h1>Shoe Detection App</h1>
 
-    <form action="/v1/predict" method="post">
-    <input type="text" name="image_url" placeholder="Enter image URL">
-    <button type="submit">Detect Shoe</button>
+    <h1>YOLO Shoe Detection App</h1>
+
+    <form action="/predict" method="post">
+        <input 
+            type="text" 
+            name="image_url" 
+            placeholder="Enter image URL (must end with .jpg or .png)" 
+            size="60"
+            required
+        >
+        <br><br>
+        <button type="submit">Detect</button>
     </form>
 
 </body>
