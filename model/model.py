@@ -9,12 +9,7 @@ def predict(image_path):
     # Run prediction
     results = model(image_path)
 
-    # Ensure static folder exists
-    os.makedirs("static", exist_ok=True)
-
-    # Unique filename
-    output_filename = f"result_{uuid.uuid4().hex}.jpg"
-    output_path = os.path.join("static", output_filename)
+    output_path = os.path.join("static", f"result_{uuid.uuid4().hex}.jpg")
 
     # Save image with detections
     results[0].save(filename=output_path)
