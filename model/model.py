@@ -1,46 +1,47 @@
-import logging
-from ultralytics import YOLO
-from pathlib import Path
+from flask import Flask, request, send_file, jsonify
+from model.model import ShoeDetector
+import os
 
-class ShoeDetector:
-    def __init__(self, model_path="best.pt"):
-        logging.info("ShoeDetector class initialized")
-        self.model = YOLO(model_path)
-        logging.info(f"Model loaded from {model_path}")
+app = Flask(__name__)
 
-    def predict(self, image_path, save_path="static/output.jpg"):
-        """Run prediction and save output image with boxes drawn."""
-        results = self.model.predict(source=image_path, save=False)
-        detections = results[0]
+# Initialize model
+shoe_detector = ShoeDetector("model/best.pt")  # adjust path if needed
 
-        # Draw boxes on the image and save
-        results[0].plot()  # modifies results[0].orig_img with boxes
-        Path(save_path).parent.mkdir(parents=True, exist_ok=True)  # make static folder
-        results[0].orig_img.save(save_path)
+@app.route("/")
+def home():
+    return "Shoe Detector API is live!"
 
-        # Return the path for Flask to display
-        return save_path
+@app.route("/predict", methods=["POST"])
+def predict():
+    """
+    Expects JSON with either:
+    { "image_url": "<url>" }  or
+    { "image_path": "<path_in_repo>" }  (optional, for testing)
+    """
 
-    def predict_classes(self, image_path):
-        """Return list of detected shoe classes (like before)"""
-        results = self.model.predict(source=image_path, save=False)
-        detections = results[0]
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
 
-        if len(detections.boxes) == 0:
-            return ["No shoes detected"]
+    image_url = data.get("image_url")
+    image_path = data.get("image_path")
+    save_path = "/tmp/detection_result.jpg"
 
-        detected_classes = []
-        for cls in detections.boxes.cls:
-            class_name = self.class_id_to_name(int(cls))
-            detected_classes.append(class_name)
+    detected_classes = shoe_detector.predict(
+        image_path=image_path,
+        image_url=image_url,
+        save_path=save_path
+    )
 
-        return list(set(detected_classes))
+    response = {"detected_classes": detected_classes}
 
-    def class_id_to_name(self, class_id):
-        class_mapping = {0: "Slipper", 1: "Sneaker"}
-        return class_mapping.get(class_id, "Unknown")
+    # Return image if detection exists
+    if os.path.exists(save_path):
+        response["image_file"] = "detection_result.jpg"  # file can be downloaded separately
 
-    # Test with LOCAL image (important)
-    predicted_classes = model.predict("test.jpg")
+    return jsonify(response)
 
-    logging.info(f"Detected shoes: {predicted_classes}")
+if __name__ == "__main__":
+    # Use PORT environment variable if set (Render sets $PORT automatically)
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
