@@ -19,14 +19,16 @@ def predict():
     if not image_url:
         return "No URL provided"
 
-    filepath = "input.jpg"
-    urllib.request.urlretrieve(image_url, filepath)
+    # Save input image to static folder
+    input_path = "static/input.jpg"
+    urllib.request.urlretrieve(image_url, input_path)
 
-    out_path  = ShoeDetector(filepath)
+    # Run your model
+    output_path = ShoeDetector(input_path)  # Make sure this returns something like 'static/output.jpg'
 
     return f"""
         <h2>Detection Result</h2>
-    <img src="/{out_path}" width="500">
+        <img src="/{output_path}" width="500">
     """
 
 
