@@ -1,38 +1,48 @@
-import os
-from flask import Flask, request, render_template
-import urllib.request
-
+from flask import Flask, request, send_file, jsonify
 from model.model import ShoeDetector
+import os
 
 app = Flask(__name__)
 
+# Initialize model
+shoe_detector = ShoeDetector("model/best.pt")  # adjust path if needed
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def home():
+    return "Shoe Detector API is live!"
 
-
-@app.route("/v1/predict", methods=["POST"])
+@app.route("/predict", methods=["POST"])
 def predict():
-    image_url = request.form.get("image_url")
-
-    if not image_url:
-        return "No URL provided"
-
-    # Save input image
-    input_path = "static/input.jpg"
-    urllib.request.urlretrieve(image_url, input_path)
-
-    # Run model and save output image
-    output_path = shoe_detector.predict(input_path)  # returns "static/output.jpg"
-
-    return f"""
-        <h2>Detection Result</h2>
-        <img src="/{output_path}" width="500">
+    """
+    Expects JSON with either:
+    { "image_url": "<url>" }  or
+    { "image_path": "<path_in_repo>" }  (optional, for testing)
     """
 
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    image_url = data.get("image_url")
+    image_path = data.get("image_path")
+    save_path = "/tmp/detection_result.jpg"
+
+    detected_classes = shoe_detector.predict(
+        image_path=image_path,
+        image_url=image_url,
+        save_path=save_path
+    )
+
+    response = {"detected_classes": detected_classes}
+
+    # Return image if detection exists
+    if os.path.exists(save_path):
+        response["image_file"] = "detection_result.jpg"  # file can be downloaded separately
+
+    return jsonify(response)
 
 if __name__ == "__main__":
+    # Use PORT environment variable if set (Render sets $PORT automatically)
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
 
