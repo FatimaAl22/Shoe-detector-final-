@@ -19,8 +19,8 @@ def predict():
     if not image_url:
         return "No URL provided"
 
-    filepath = "inout.jpg"
-    urllib.request.ulretriev(image_url, filepath)
+    filepath = "input.jpg"
+    urllib.request.urlretrieve(image_url, filepath)
 
     out_path  = ShoeDetector(filepath)
 
