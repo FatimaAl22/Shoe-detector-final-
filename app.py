@@ -1,63 +1,33 @@
 import os
-import logging
-from flask import Flask, request, jsonify
+from flask import Flask, request, render_template
+import urllib.request
 
 from model.model import ShoeDetector
 
 app = Flask(__name__)
 
-# Load model once
-model_path = "best.pt"
-model = ShoeDetector(model_path)
 
-logging.basicConfig(level=logging.INFO)
-
-
-@app.route("/", methods=["GET"])
+@app.route("/")
 def index():
-    return jsonify({
-        "name": "Shoe Detection API",
-        "version": "1.0",
-        "endpoint": "/v1/predict",
-        "method": "POST",
-        "input": "form-data with key = 'file'"
-    })
+    return render_template("index.html")
 
 
 @app.route("/v1/predict", methods=["POST"])
 def predict():
-    logging.info("Predict request received!")
+    image_url = request.form.get("image_url")
 
-    # Check file
-    if "file" not in request.files:
-        return jsonify({"error": "Please upload an image file"}), 400
+    if not image_url:
+        return "No URL provided"
 
-    file = request.files["file"]
+    filepath = "inout.jpg"
+    urllib.request.ulretriev(image_url, filepath)
 
-    if file.filename == "":
-        return jsonify({"error": "No file selected"}), 400
+    out_path  = ShoeDetector(filepath)
 
-    # Save file temporarily
-    filepath = "temp.jpg"
-    file.save(filepath)
-
-    try:
-        # Run prediction
-        prediction = model.predict(filepath)
-
-        return jsonify({
-            "predicted_class": prediction
-        })
-
-    except Exception as e:
-        return jsonify({
-            "error": str(e)
-        }), 500
-
-    finally:
-        # Clean up
-        if os.path.exists(filepath):
-            os.remove(filepath)
+    return f"""
+        <h2>Detection Result</h2>
+    <img src="/{output_path}" width="500">
+    """
 
 
 if __name__ == "__main__":
