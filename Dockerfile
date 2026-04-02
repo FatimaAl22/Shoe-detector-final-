@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.10
 
 WORKDIR /app
 
@@ -13,11 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Remove hardcoded PORT if you want Render to assign it dynamically
-# ENV PORT=10000
+EXPOSE 8000
 
-# Use shell form so $PORT is expanded correctly
-CMD gunicorn --bind 0.0.0.0:$PORT app:app
+CMD ["python", "app.py"]
 
 
 
