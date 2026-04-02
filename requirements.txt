@@ -1,6 +1,4 @@
-flask
-numpy
-pillow
-torch
+flask==2.3.3
 ultralytics
-gunicorn
+opencv-python
+pillow
