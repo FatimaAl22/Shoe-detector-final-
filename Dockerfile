@@ -16,11 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# IMPORTANT: Render uses dynamic port
-ENV PORT=10000
-
 # Expose port
-EXPOSE 10000
+EXPOSE 8000
 
 # Run app
 CMD ["python", "app.py"]
