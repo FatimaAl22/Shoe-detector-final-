@@ -26,7 +26,7 @@ def predict():
 
     return f"""
         <h2>Detection Result</h2>
-    <img src="/{output_path}" width="500">
+    <img src="/{out_path}" width="500">
     """
 
 
